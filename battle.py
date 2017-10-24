@@ -11,9 +11,10 @@ class Entity:
   endurance = 0
   mana = 0
   sanity = 0
-  hunger = 0
+  hunger = 3
   
-  def _init(self, health, endurance, mana, sanity, hunger):
+  def __init__(self, name, health, endurance, mana, sanity, hunger):
+    self.name = name
     self.health = health
     self.endurance = endurance
     self.mana = mana
@@ -21,12 +22,14 @@ class Entity:
     self.hunger = hunger
     
   def display_stats(self):
-    print("Health:", self.health, "\nEndurance:", self.endurance)
+    print("Name:", self.name, "\nHealth:", self.health, "\nEndurance:", self.endurance, "\nMana:", self.mana, "\nSanity:", self.sanity, "\nHunger", self.hunger, "\n")
     
   def display_actions(self):
     print("Action One:", self.action1)
     
-def make_entity(health, endurance, mana, sanity, hunger):
-  entity = Entity(health, endurance, mana, sanity, hunger)
-  return entity
+player = Entity("Not Steve",100,50,100,1,100)
+player.display_stats()
+
+bog_monster = Entity("Bog Monster",250,50,50,100,100)
+bog_monster.display_stats()
   
