@@ -29,12 +29,35 @@ class Entity:
   def __init__(self, name, hp, mp, stam, thirst, pysch):
     self.name = name
     self.stats = {'hp': Attribute(hp), 'mp': Attribute(mp), 'stam': Attribute(stam), 'thirst': Attribute(thirst), 'psych': Attribute(pysch)}
-  
-  # def displayStats(self):
-  #   print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
+    
+  def showName(self):
+    print("Name:", self.name)
+    
+  def showHp(self):
+    print("Health:", self.stats['hp'].get(), "/", self.stats['hp'].getMax())
+
+  def showMp(self):
+    print("Mana:", self.stats['mp'].get(), "/", self.stats['mp'].getMax())
+
+  def showStam(self):
+    print("Stamina:", self.stats['stam'].get(), "/", self.stats['stam'].getMax())
+    
+  def showThirst(self):
+    print("Thirst:", self.stats['thirst'].get(), "/", self.stats['thirst'].getMax())
+    
+  def showPsych(self):
+    print("Pysch:", self.stats['psych'].get(), "/", self.stats['psych'].getMax())
+
+  def showStats(self):
+    self.showName()
+    self.showHp()
+    self.showMp()
+    self.showStam()
+    self.showThirst()
+    self.showPsych()
 
 player = Entity("Not Steve", 101, 40, 50, 60, 70)
-# player.displayStats()
-
-bogMonster = Entity("Bog Monster", 101, 40, 50, 60, 70)
-# bogMonster.displayStats()
+player.showStats()
+print("")
+bogMonster = Entity("Bog Monster", 250, 40, 50, 60, 70)
+bogMonster.showStats()
