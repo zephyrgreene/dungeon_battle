@@ -24,16 +24,17 @@ class Entity:
   actions = []
   
   # Using a class for attributes
-  # attributes = {hp: 0, mp: 1, stam: 2, thirst: 3, psych: 4}
+  stats = {}
   
-  def __init__(self, name):
+  def __init__(self, name, hp, mp, stam, thirst, pysch):
     self.name = name
+    self.stats = {'hp': Attribute(hp), 'mp': Attribute(mp), 'stam': Attribute(stam), 'thirst': Attribute(thirst), 'psych': Attribute(pysch)}
   
   # def displayStats(self):
   #   print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
 
-player = Entity("Not Steve")
+player = Entity("Not Steve", 101, 40, 50, 60, 70)
 # player.displayStats()
 
-bogMonster = Entity("Bog Monster")
+bogMonster = Entity("Bog Monster", 101, 40, 50, 60, 70)
 # bogMonster.displayStats()
