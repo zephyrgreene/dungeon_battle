@@ -1,3 +1,7 @@
+class Attribute:
+  current = 100
+  max = 100
+
 class Entity:
   name = ""
   
@@ -27,22 +31,6 @@ class Entity:
   def setMaxHp(self, newMax):
     self.maxHp = newMax
     self.hp = self.maxHp
-    
-  def addMp(self, addMp):
-    if(self.mp + addMp <= self.maxMp):
-      self.mp += addMp
-  
-  def setMaxMp(self, newMax):
-    self.maxMp = newMax
-    self.mp = self.maxMp
-    
-  def addStam(self, addStam):
-    if(self.stam + addStam <= self.maxStam):
-      self.stam += addStam
-  
-  def setMaxStam(self, newMax):
-    self.stam = newMax
-    self.stam = self.maxStam
   
   def displayStats(self):
     print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
@@ -53,4 +41,3 @@ player.displayStats()
 bogMonster = Entity("Bog Monster")
 bogMonster.setMaxHp(250)
 bogMonster.displayStats()
-  
