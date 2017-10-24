@@ -11,6 +11,12 @@ class Attribute:
 
   def add(self, delta):
     self.now += delta
+    
+  def get(self):
+    return self.now
+    
+  def getMax(self):
+    return self.max
 
 class Entity:
   name = ""
@@ -23,20 +29,11 @@ class Entity:
   def __init__(self, name):
     self.name = name
   
-  def addHp(self, addHp):
-    if(self.hp + addHp <= self.maxHp):
-      self.hp += addHp
-  
-  def setMaxHp(self, newMax):
-    self.maxHp = newMax
-    self.hp = self.maxHp
-  
   # def displayStats(self):
   #   print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
 
 player = Entity("Not Steve")
-player.displayStats()
+# player.displayStats()
 
 bogMonster = Entity("Bog Monster")
-bogMonster.setMaxHp(250)
-bogMonster.displayStats()
+# bogMonster.displayStats()
