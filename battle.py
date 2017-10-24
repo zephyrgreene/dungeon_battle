@@ -6,6 +6,9 @@ class Attribute:
     self.max = setMax
     self.now += add
 
+  def add(self, delta):
+    self.now += delta
+
 class Entity:
   name = ""
   
@@ -13,20 +16,6 @@ class Entity:
   
   # Using a class for attributes
   # attributes = {hp: 0, mp: 1, stam: 2, thirst: 3, psych: 4}
-  
-  # # Max stats
-  # maxHp = 100
-  # maxStam = 100
-  # maxMp = 100
-  # maxPsych = 100
-  # maxThirst = 100
-  
-  # # Current stats
-  # hp = maxHp
-  # stam = maxStam
-  # mp = maxMp
-  # psych = maxPsych
-  # thirst = maxThirst
   
   def __init__(self, name):
     self.name = name
