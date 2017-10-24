@@ -2,8 +2,8 @@ class Attribute:
   max = 1
   now = max
   
-  def __init__(self, max, add):
-    self.max = max
+  def __init__(self, setMax, add):
+    self.max = setMax
     self.now += add
 
 class Entity:
@@ -11,19 +11,22 @@ class Entity:
   
   actions = []
   
-  # Max stats
-  maxHp = 100
-  maxStam = 100
-  maxMp = 100
-  maxPsych = 100
-  maxThirst = 100
+  # Using a class for attributes
+  # attributes = {hp: 0, mp: 1, stam: 2, thirst: 3, psych: 4}
   
-  # Current stats
-  hp = maxHp
-  stam = maxStam
-  mp = maxMp
-  psych = maxPsych
-  thirst = maxThirst
+  # # Max stats
+  # maxHp = 100
+  # maxStam = 100
+  # maxMp = 100
+  # maxPsych = 100
+  # maxThirst = 100
+  
+  # # Current stats
+  # hp = maxHp
+  # stam = maxStam
+  # mp = maxMp
+  # psych = maxPsych
+  # thirst = maxThirst
   
   def __init__(self, name):
     self.name = name
