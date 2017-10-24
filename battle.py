@@ -1,6 +1,10 @@
 class Attribute:
-  current = 100
-  max = 100
+  max = 1
+  now = max
+  
+  def __init__(self, max, add):
+    self.max = max
+    self.now += add
 
 class Entity:
   name = ""
