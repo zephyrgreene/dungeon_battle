@@ -1,35 +1,56 @@
 class Entity:
   name = ""
   
-  action1 = ""
-  action2 = ""
-  action3 = ""
-  action4 = ""
-  action5 = ""
+  actions = []
   
-  health = 0
-  endurance = 0
-  mana = 0
-  sanity = 0
-  hunger = 3
+  # Max stats
+  maxHp = 100
+  maxStam = 100
+  maxMp = 100
+  maxPsych = 100
+  maxThirst = 100
   
-  def __init__(self, name, health, endurance, mana, sanity, hunger):
+  # Current stats
+  hp = maxHp
+  stam = maxStam
+  mp = maxMp
+  psych = maxPsych
+  thirst = maxThirst
+  
+  def __init__(self, name):
     self.name = name
-    self.health = health
-    self.endurance = endurance
-    self.mana = mana
-    self.sanity = sanity
-    self.hunger = hunger
+  
+  def addHp(self, addHp):
+    if(self.hp + addHp <= self.maxHp):
+      self.hp += addHp
+  
+  def setMaxHp(self, newMax):
+    self.maxHp = newMax
+    self.hp = self.maxHp
     
-  def display_stats(self):
-    print("Name:", self.name, "\nHealth:", self.health, "\nEndurance:", self.endurance, "\nMana:", self.mana, "\nSanity:", self.sanity, "\nHunger", self.hunger, "\n")
+  def addMp(self, addMp):
+    if(self.mp + addMp <= self.maxMp):
+      self.mp += addMp
+  
+  def setMaxMp(self, newMax):
+    self.maxMp = newMax
+    self.mp = self.maxMp
     
-  def display_actions(self):
-    print("Action One:", self.action1)
-    
-player = Entity("Not Steve",100,50,100,1,100)
-player.display_stats()
+  def addStam(self, addStam):
+    if(self.stam + addStam <= self.maxStam):
+      self.stam += addStam
+  
+  def setMaxStam(self, newMax):
+    self.stam = newMax
+    self.stam = self.maxStam
+  
+  def displayStats(self):
+    print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
 
-bog_monster = Entity("Bog Monster",250,50,50,100,100)
-bog_monster.display_stats()
+player = Entity("Not Steve")
+player.displayStats()
+
+bogMonster = Entity("Bog Monster")
+bogMonster.setMaxHp(250)
+bogMonster.displayStats()
   
