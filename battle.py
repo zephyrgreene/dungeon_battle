@@ -1,7 +1,4 @@
 class Attribute:
-  max = 1
-  now = max
-  
   def __init__(self, setMax):
     self.setMax(setMax)
 
@@ -31,22 +28,22 @@ class Entity:
     self.stats = {'hp': Attribute(hp), 'mp': Attribute(mp), 'stam': Attribute(stam), 'thirst': Attribute(thirst), 'psych': Attribute(pysch)}
     
   def showName(self):
-    print("Name:", self.name)
+    print(f"Name: {self.name}")
     
   def showHp(self):
-    print("Health:", self.stats['hp'].get(), "/", self.stats['hp'].getMax())
+    print(f"Health: {self.stats['hp'].get()}/{self.stats['hp'].getMax()}")
 
   def showMp(self):
-    print("Mana:", self.stats['mp'].get(), "/", self.stats['mp'].getMax())
+    print(f"Mana: {self.stats['mp'].get()}/{self.stats['mp'].getMax()}")
 
   def showStam(self):
-    print("Stamina:", self.stats['stam'].get(), "/", self.stats['stam'].getMax())
+    print(f"Stamina: {self.stats['stam'].get()}/{self.stats['stam'].getMax()}")
     
   def showThirst(self):
-    print("Thirst:", self.stats['thirst'].get(), "/", self.stats['thirst'].getMax())
+    print(f"Thirst: {self.stats['thirst'].get()}/{self.stats['thirst'].getMax()}")
     
   def showPsych(self):
-    print("Pysch:", self.stats['psych'].get(), "/", self.stats['psych'].getMax())
+    print(f"Pysch: {self.stats['psych'].get()}/{self.stats['psych'].getMax()}")
 
   def showStats(self):
     self.showName()
