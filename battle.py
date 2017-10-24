@@ -2,9 +2,12 @@ class Attribute:
   max = 1
   now = max
   
-  def __init__(self, setMax, add):
-    self.max = setMax
-    self.now += add
+  def __init__(self, setMax):
+    self.setMax(setMax)
+
+  def setMax(self, newMax):
+    self.max = newMax
+    self.now = self.max
 
   def add(self, delta):
     self.now += delta
@@ -28,8 +31,8 @@ class Entity:
     self.maxHp = newMax
     self.hp = self.maxHp
   
-  def displayStats(self):
-    print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
+  # def displayStats(self):
+  #   print("Name:", self.name, "\nHealth:", self.hp, "\nEndurance:", self.stam, "\nMana:", self.mp, "\nSanity:", self.psych, "\nHunger", self.thirst, "\n")
 
 player = Entity("Not Steve")
 player.displayStats()
