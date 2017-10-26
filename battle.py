@@ -1,34 +1,78 @@
-import sys
-
-class Attribute:
-  def __init__(self, setMax):
-    self.setMax(setMax)
-
-  def setMax(self, newMax):
-    self.max = newMax
-    self.now = self.max
+class Pool:
+  def __init__(self, val = 1, base = 0):
+    self.base = base
+    
+    if (val > 0):
+      self.setMax(val)
+    else:
+      self.valError()
+ 
+  def valError(self):
+    raise ValueError("Pool.max cannot be less than 1.")
+     
+  def setMax(self, val):
+    self.max = val
+    self.val = self.max
   
   def addMax(self, delta):
     self.max += delta
-    self.now += delta
+    self.val += delta
   
   def add(self, delta):
-    if (self.now + delta <= self.max):
-      self.now += delta
+    if (self.val + delta <= self.max):
+      self.val += delta
     else:
-      print("Already at max!")
-    
-  def get(self):
-    return self.now
-    
-  def getMax(self):
-    return self.max
+      self.val = self.max
+
+class Attribute:
+  def __init__(self, val = 1, multiplier = 1):
+    self.setVal(val)
+
+  def valError(self):
+    raise ValueError("Attributes.val cannot be less than 1.")
+
+  def setVal(self, val):
+    if (val > 0):
+      self.val = val
+    else:
+      self.valError()
+      
+  def add(self, delta):
+    if (self.val + delta > 0):
+      self.val += delta
+    else:
+      self.valError()
 
 class Entity:
-  def __init__(self, name, hp = 100, mp = 100, stam = 100, thirst = 100, psych = 100):
+  def __init__(self, name, strength = 1, psych = 1, vitality = 1, sustenance = 1, intelligence = 1):
     self.isAlive = True
     self.name = name
-    self.stats = {'hp': Attribute(hp), 'mp': Attribute(mp), 'stam': Attribute(stam), 'thirst': Attribute(thirst), 'psych': Attribute(psych)}
+    
+    self.strength = Attribute(strength)
+    self.psych = Attribute(psych)
+    self.vitality = Attribute(vitality)
+    self.intelligence = Attribute(intelligence)
+    self.sustenance = Attribute(sustenance)
+    
+    self.health = Pool(self.vitality.val * 10)
+    self.stamina = Pool(self.strength.val * 11)
+    self.sanity = Pool(self.psych.val * 8)
+    self.mana = Pool(self.intelligence.val * 9)
+    self.hunger = Pool(self.sustenance.val * 7)
+    
+    self.stats = {
+      'strength':self.strength.val,
+      'psych':self.psych.val,
+      'vitality':self.vitality.val,
+      'intelligence' :self.intelligence.val,
+      'sustenance' :self.sustenance.val,
+      
+      'health':self.health.val,
+      'stamina':self.stamina.val,
+      'sanity':self.sanity.val,
+      'mana' :self.mana.val,
+      'hunger' :self.hunger.val
+    }
   
   def showName(self):
     print(f"Name: {self.name}")
@@ -139,7 +183,7 @@ def gameLoop():
             player.showStam()
           if (monster.stats['hp'].get() -85 <= 0):
             monster.isAlive = False
-            print(f"{monster.name} is dead!\n You win!")
+            print(f"{monster.name} is dead!\nYou win!")
           else:
             monster.stats['hp'].add(-85)
             monster.showHp()
