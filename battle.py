@@ -44,9 +44,12 @@ class Attribute:
       self.valError()
 
 class Entity:
-  def __init__(self, name, strength = 1, psych = 1, vitality = 1, sustenance = 1, intelligence = 1):
+  def __init__(self, name, strength = 1, psych = 1, vitality = 1, sustenance = 1, intelligence = 1, player = False):
     self.isAlive = True
+    self.isPlayer = player
     self.name = name
+    self.actions = ['Fight']
+    self.inventory = []
     
     self.strength = Attribute(strength)
     self.psych = Attribute(psych)
@@ -62,8 +65,11 @@ class Entity:
     
   def aliveCheck(self):
     if (self.health.val <= 0 or self.stamina.val <= 0 or self.sanity.val <= 0 or self.mana.val <= 0 or self.hunger.val <= 0):
-      print(f"{self.name} is dead")
       self.isAlive = False
+      if (self.isPlayer):
+        print(f"{self.name} is dead.\nGame Over")
+      else:
+        print(f"The {self.name} is dead.\nYou Win!")
     else:
       self.isAlive = True
       
@@ -89,10 +95,10 @@ class Question:
     self.outcomes = outcomes
 
 def playerPrompt():
-  name = input("What is your name?")
+  name = input("\nWhat is your name?")
   answerKey = ['a','b','c','d','e']
   
-  color = Question("What is your favorite color?", 
+  color = Question("\nWhat is your favorite color?", 
     {"a":"Purple",
     "b":"Blue",
     "c":"Yellow",
@@ -105,18 +111,31 @@ def playerPrompt():
     "d":lambda: player.vitality.add(10),
     "e":lambda: player.sustenance.add(10)})
     
-  action = Question("What would you rather be?", 
+  action = Question("\nWhat would you rather be?", 
     {"a":"Acrobat",
     "b":"Dancer",
     "c":"Singer",
     "d":"Talker",
     "e":"Weight lifter"},
     
-    {"a":"player.action.append('acrobat')",
-    "b":"player.action.append('dancer')",
-    "c":"player.action.append('sing')",
-    "d":"player.action.append('talk')",
-    "e":"player.action.append('strong')"})
+    {"a":lambda: player.actions.append('Flip over'),
+    "b":lambda: player.actions.append('Dance with'),
+    "c":lambda: player.actions.append('Sing at'),
+    "d":lambda: player.actions.append('Converse with'),
+    "e":lambda: player.actions.append('Lift')})
+    
+  weapon = Question("\nWhat's your weapon of choice?", 
+    {"a":"Rubber Chicken",
+    "b":"Baseball Bat",
+    "c":"Crossbow",
+    "d":"Chainsaw",
+    "e":"Magic Wand"},
+    
+    {"a":lambda: player.inventory.append('rubber chicken'),
+    "b":lambda: player.inventory.append('baseball bat'),
+    "c":lambda: player.inventory.append('crossbow'),
+    "d":lambda: player.inventory.append('chainsaw'),
+    "e":lambda: player.inventory.append('magic wand')})
   
   ans = ''
   while (ans not in answerKey):
@@ -126,75 +145,81 @@ def playerPrompt():
   ans = ''
   while(ans not in answerKey):
     ans = input(f"{action.text}\nA) {action.options['a']}\nB) {action.options['b']}\nC) {action.options['c']}\nD) {action.options['d']}\nE) {action.options['e']}\n").lower()
-
   actionAns = ans
-  player = Entity(name)
+  
+  ans = ''
+  while(ans not in answerKey):
+    ans = input(f"{weapon.text}\nA) {weapon.options['a']}\nB) {weapon.options['b']}\nC) {weapon.options['c']}\nD) {weapon.options['d']}\nE) {weapon.options['e']}\n").lower()
+  weaponAns = ans
+
+  player = Entity(name, player = True)
   color.outcomes[colorAns]()
+  action.outcomes[actionAns]()
+  weapon.outcomes[weaponAns]()
+  
   return player
 
 def gameLoop():
-  player = playerPrompt()
-  monster = Entity("Eldritch Horror", vitality = 15, sustenance = 8)
-  print(f"{player.name}, you are in a winding and dangerous dungeon.","\nYou are unaware how you got here, but you must journey forward to escape.")
-  
+  print(f"You are in a winding and dangerous dungeon.","\nYou are unaware how you got here, but you must journey forward to escape.")
   while(True):
-    ans = input(f"Will you journey forward?\nA) Yes\nB) No\n").lower()
+    ans = input(f"\nWill you journey forward?\nA) Yes\nB) No\n").lower()
     if (ans == 'a' or ans == 'b'):
       break
-  
+  if(ans == 'b'):
+    print("You commit ritual sudoku and die.\nGame Over.")
+    
   if (ans == 'a'):
-    print(f"You have encountered a {monster.name}.")
+    player = playerPrompt()
+    monster = Entity("Eldritch Horror", vitality = 15, sustenance = 8)
+
+    print(f"\nYou have encountered a {monster.name}.")
     while(player.isAlive and monster.isAlive):
-      ans = input("What action will you take?\nA) Fight\nB) Pick it up\nC) Dance").lower()
+      ans = input(f"\nWhat action will you take?\nA) {player.actions[0]} with {player.inventory[0]}\nB) {player.actions[1]} it\nC) Something else\n").lower()
       if (ans == 'a'):
-        print(f"You attack the monster with your sword dealing 73 damage.",
+        print(f"You attack the monster with your {player.inventory[0]} dealing 73 damage.",
         "\nIt lashes back with its tentacles, dealing 25 damage.\n")
         
         monster.health.add(-73)
         monster.aliveCheck()
-        if(monster.isAlive != True):
+        if not(monster.isAlive):
           break
         
         player.health.add(-25)
         player.aliveCheck()
-        if(player.isAlive != True):
+        if not(player.isAlive):
           break
 
       elif (ans == 'b'):
-        print(f"You strain to pick up the {monster.name}, dealing 85 damage but losing 35 stamina.",
+        print(f"You {player.actions[1]} it, dealing 85 damage but losing 35 stamina.",
         f"\nThe {monster.name} struggles to get back up.\n")
 
         monster.health.add(-85)
         monster.aliveCheck()
-        if(monster.isAlive != True):
+        if not(monster.isAlive):
           break
 
         player.stamina.add(-35)
         player.aliveCheck()
-        if(player.isAlive != True):
+        if not(player.isAlive):
           break
 
       elif (ans == 'c'):
-        print(f"You dance your heart out, reducing {monster.name}'s spirit by  41.",
+        print(f"You stare blankly at it, reducing the {monster.name}'s spirit by  41.",
         f"\nThe {monster.name} belts out an undescribable cry, reducing your sanity by 25.\n")
 
         monster.mana.add(-41)
         monster.aliveCheck()
-        if(monster.isAlive != True):
+        if not(monster.isAlive):
           break
 
         player.sanity.add(-25)
         player.aliveCheck()
-        if(player.isAlive != True):
+        if not(player.isAlive):
           break
-
       else:
         pass
-  elif (ans == 'b'):
-    print("You commit ritual sudoku and die.\n")
-    player.isAlive = False
   else:
     pass
-  return player, monster
 
-(player, monster)= gameLoop()
+gameLoop()
+
