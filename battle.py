@@ -151,12 +151,12 @@ def gameLoop():
         "\nIt lashes back with its tentacles, dealing 25 damage.\n")
         
         monster.health.add(-73)
-        monster.isAlive = monster.aliveCheck()
+        monster.aliveCheck()
         if(monster.isAlive != True):
           break
         
         player.health.add(-25)
-        player.isAlive = player.aliveCheck()
+        player.aliveCheck()
         if(player.isAlive != True):
           break
 
