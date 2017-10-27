@@ -1,7 +1,7 @@
 class Pool:
-  def __init__(self, val = 1, base = 0):
-    self.base = base
-    
+  base = 50
+
+  def __init__(self, val = 1):
     if (val > 0):
       self.setMax(val)
     else:
@@ -11,12 +11,12 @@ class Pool:
     raise ValueError("Pool.max cannot be less than 1.")
      
   def setMax(self, val):
-    self.max = val
+    self.max = val + Pool.base
     self.val = self.max
-  
+
   def addMax(self, delta):
     self.max += delta
-    self.val += delta
+    self.add(delta)
   
   def add(self, delta):
     if (self.val + delta <= self.max):
@@ -54,13 +54,21 @@ class Entity:
     self.intelligence = Attribute(intelligence)
     self.sustenance = Attribute(sustenance)
     
-    self.health = Pool(self.vitality.val * 10, base = 50)
-    self.stamina = Pool(self.strength.val * 11, base = 50)
-    self.sanity = Pool(self.psych.val * 8, base = 50)
-    self.mana = Pool(self.intelligence.val * 9, base = 50)
-    self.hunger = Pool(self.sustenance.val * 7, base = 50)
+    self.health = Pool(self.vitality.val * 10)
+    self.stamina = Pool(self.strength.val * 11)
+    self.sanity = Pool(self.psych.val * 8)
+    self.mana = Pool(self.intelligence.val * 9)
+    self.hunger = Pool(self.sustenance.val * 7)
     
-    self.stats = {
+  def aliveCheck(self):
+    if (self.health.val <= 0 or self.stamina.val <= 0 or self.sanity.val <= 0 or self.mana.val <= 0 or self.hunger.val <= 0):
+      print(f"{self.name} is dead")
+      self.isAlive = False
+    else:
+      self.isAlive = True
+      
+  def showStats(self):
+    print({
       'strength':self.strength.val,
       'psych':self.psych.val,
       'vitality':self.vitality.val,
@@ -72,14 +80,7 @@ class Entity:
       'sanity':self.sanity.val,
       'mana' :self.mana.val,
       'hunger' :self.hunger.val
-    }
-    
-  def aliveCheck(self):
-    if (self.health.val <= 0 or self.stamina.val <= 0 or self.sanity.val <= 0 or self.mana.val <= 0 or self.hunger.val <= 0):
-      print(f"{self.name} is dead")
-      return False
-    else:
-      return True
+    })
 
 class Question:
   def __init__(self, text, options, outcomes):
@@ -98,11 +99,11 @@ def playerPrompt():
     "d":"Red",
     "e":"Brown"},
     
-    {"a":lambda: player.sanity.addMax(50),
-    "b":lambda: player.mana.addMax(50),
-    "c":lambda: player.stamina.addMax(50),
-    "d":lambda: player.health.addMax(50),
-    "e":lambda: player.hunger.addMax(50)})
+    {"a":lambda: player.psych.add(10),
+    "b":lambda: player.intelligence.add(10),
+    "c":lambda: player.strength.add(10),
+    "d":lambda: player.vitality.add(10),
+    "e":lambda: player.sustenance.add(10)})
     
   action = Question("What would you rather be?", 
     {"a":"Acrobat",
@@ -125,49 +126,68 @@ def playerPrompt():
   ans = ''
   while(ans not in answerKey):
     ans = input(f"{action.text}\nA) {action.options['a']}\nB) {action.options['b']}\nC) {action.options['c']}\nD) {action.options['d']}\nE) {action.options['e']}\n").lower()
-  actionAns = ans
-  
-  # print(f"\nHi {name}!\nYou're a {color.options[colorAns].lower()}-shirted {action.options[actionAns].lower()}!")
 
+  actionAns = ans
   player = Entity(name)
   color.outcomes[colorAns]()
   return player
 
 def gameLoop():
   player = playerPrompt()
-  monster = Entity("Eldritch Horror", vitality = 250, intelligence = 125, psych = 175)
+  monster = Entity("Eldritch Horror", vitality = 15, sustenance = 8)
   print(f"{player.name}, you are in a winding and dangerous dungeon.","\nYou are unaware how you got here, but you must journey forward to escape.")
   
   while(True):
     ans = input(f"Will you journey forward?\nA) Yes\nB) No\n").lower()
     if (ans == 'a' or ans == 'b'):
       break
-    
+  
   if (ans == 'a'):
     print(f"You have encountered a {monster.name}.")
     while(player.isAlive and monster.isAlive):
-      ans = input("What action will you take?\nA) Fight\nB) Pick it up\nC) Dance")
+      ans = input("What action will you take?\nA) Fight\nB) Pick it up\nC) Dance").lower()
       if (ans == 'a'):
         print(f"You attack the monster with your sword dealing 73 damage.",
         "\nIt lashes back with its tentacles, dealing 25 damage.\n")
+        
         monster.health.add(-73)
         monster.isAlive = monster.aliveCheck()
+        if(monster.isAlive != True):
+          break
+        
         player.health.add(-25)
         player.isAlive = player.aliveCheck()
+        if(player.isAlive != True):
+          break
+
       elif (ans == 'b'):
         print(f"You strain to pick up the {monster.name}, dealing 85 damage but losing 35 stamina.",
         f"\nThe {monster.name} struggles to get back up.\n")
-        player.stamina.add(-35)
-        player.isAlive = player.aliveCheck()
+
         monster.health.add(-85)
-        monster.isAlive = monster.aliveCheck()
+        monster.aliveCheck()
+        if(monster.isAlive != True):
+          break
+
+        player.stamina.add(-35)
+        player.aliveCheck()
+        if(player.isAlive != True):
+          break
+
       elif (ans == 'c'):
         print(f"You dance your heart out, reducing {monster.name}'s spirit by  41.",
-        f"\nThe {monster.name} belts out an undescribable cry, reducing your sanity by 30.\n")
+        f"\nThe {monster.name} belts out an undescribable cry, reducing your sanity by 25.\n")
+
         monster.mana.add(-41)
-        monster.isAlive = monster.aliveCheck()
-        player.sanity.add(-30)
-        player.isAlive = player.aliveCheck()
+        monster.aliveCheck()
+        if(monster.isAlive != True):
+          break
+
+        player.sanity.add(-25)
+        player.aliveCheck()
+        if(player.isAlive != True):
+          break
+
       else:
         pass
   elif (ans == 'b'):
@@ -175,6 +195,6 @@ def gameLoop():
     player.isAlive = False
   else:
     pass
-  return player
+  return player, monster
 
-player = gameLoop()
+(player, monster)= gameLoop()
