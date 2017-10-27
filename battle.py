@@ -54,11 +54,11 @@ class Entity:
     self.intelligence = Attribute(intelligence)
     self.sustenance = Attribute(sustenance)
     
-    self.health = Pool(self.vitality.val * 10)
-    self.stamina = Pool(self.strength.val * 11)
-    self.sanity = Pool(self.psych.val * 8)
-    self.mana = Pool(self.intelligence.val * 9)
-    self.hunger = Pool(self.sustenance.val * 7)
+    self.health = Pool(self.vitality.val * 10, base = 50)
+    self.stamina = Pool(self.strength.val * 11, base = 50)
+    self.sanity = Pool(self.psych.val * 8, base = 50)
+    self.mana = Pool(self.intelligence.val * 9, base = 50)
+    self.hunger = Pool(self.sustenance.val * 7, base = 50)
     
     self.stats = {
       'strength':self.strength.val,
@@ -73,35 +73,13 @@ class Entity:
       'mana' :self.mana.val,
       'hunger' :self.hunger.val
     }
-  
-  def showName(self):
-    print(f"Name: {self.name}")
     
-  def showHp(self):
-    print(f"Health:  {self.stats['hp'].get()}/{self.stats['hp'].getMax()}")
-
-  def showMp(self):
-    print(f"Spirit:  {self.stats['mp'].get()}/{self.stats['mp'].getMax()}")
-
-  def showStam(self):
-    print(f"Stamina: {self.stats['stam'].get()}/{self.stats['stam'].getMax()}")
-    
-  def showThirst(self):
-    print(f"Hunger:  {self.stats['thirst'].get()}/{self.stats['thirst'].getMax()}")
-    
-  def showPsych(self):
-    print(f"Sanity:  {self.stats['psych'].get()}/{self.stats['psych'].getMax()}")
-
-  def showName(self):
-    print(self.name)
-
-  def showStats(self):
-    self.showHp()
-    self.showMp()
-    self.showStam()
-    self.showThirst()
-    self.showPsych()
-    print("")
+  def aliveCheck(self):
+    if (self.health.val <= 0 or self.stamina.val <= 0 or self.sanity.val <= 0 or self.mana.val <= 0 or self.hunger.val <= 0):
+      print(f"{self.name} is dead")
+      return False
+    else:
+      return True
 
 class Question:
   def __init__(self, text, options, outcomes):
@@ -120,11 +98,11 @@ def playerPrompt():
     "d":"Red",
     "e":"Brown"},
     
-    {"a":lambda: player.stats['psych'].addMax(50),
-    "b":lambda: player.stats['mp'].addMax(50),
-    "c":lambda: player.stats['stam'].addMax(50),
-    "d":lambda: player.stats['hp'].addMax(50),
-    "e":lambda: player.stats['thirst'].addMax(50)})
+    {"a":lambda: player.sanity.addMax(50),
+    "b":lambda: player.mana.addMax(50),
+    "c":lambda: player.stamina.addMax(50),
+    "d":lambda: player.health.addMax(50),
+    "e":lambda: player.hunger.addMax(50)})
     
   action = Question("What would you rather be?", 
     {"a":"Acrobat",
@@ -157,46 +135,46 @@ def playerPrompt():
 
 def gameLoop():
   player = playerPrompt()
-  monster = Entity("Eldritch Horror", hp = 250, mp = 125, psych = 175)
-  print(f"{player.name}, you are in a winding and dangerous maze-like dungeon.","\nYou are unaware how you got here, but you must journey forward to escape.")
+  monster = Entity("Eldritch Horror", vitality = 250, intelligence = 125, psych = 175)
+  print(f"{player.name}, you are in a winding and dangerous dungeon.","\nYou are unaware how you got here, but you must journey forward to escape.")
   
-  while(player.isAlive):
+  while(True):
     ans = input(f"Will you journey forward?\nA) Yes\nB) No\n").lower()
-    if (ans == 'a'):
-      print(f"You have encountered a {monster.name}.")
-      while(player.isAlive and monster.isAlive):
-        ans = input("What action will you take?\nA) Fight\nB) Pick it up\nC) Dance")
-        if (ans == 'a'):
-          print(f"You attack the monster with your sword dealing 73 damage.",
-          "\nIt lashes back with its tentacles, dealing 15 damage.\n")
-          monster.stats['hp'].add(-73)
-          player.stats['hp'].add(-25)
-        elif (ans == 'b'):
-          print(f"You strain to pick up the {monster.name}, dealing 85 damage but losing 35 stamina.",
-          f"\nThe {monster.name} struggles to get back up.\n")
-          if (player.stats['stam'].get() -35 <= 0):
-            player.isAlive = False
-            print(f"{player.name} has died!\nGame Over.")
-            break
-          else: 
-            player.stats['stam'].add(-35)
-            player.showStam()
-          if (monster.stats['hp'].get() -85 <= 0):
-            monster.isAlive = False
-            print(f"{monster.name} is dead!\nYou win!")
-          else:
-            monster.stats['hp'].add(-85)
-            monster.showHp()
-        elif (ans == 'c'):
-          print(f"You dance your heart out, reducing {monster.name}'s spirit by  41.",
-          f"\nThe {monster.name} belts out an undescribable cry, reducing your sanity by 30.\n")
-        else:
-          pass
-    elif (ans == 'b'):
-      print("You commit ritual sudoku and die.\n")
-      player.isAlive = False
-    else:
-      pass
+    if (ans == 'a' or ans == 'b'):
+      break
+    
+  if (ans == 'a'):
+    print(f"You have encountered a {monster.name}.")
+    while(player.isAlive and monster.isAlive):
+      ans = input("What action will you take?\nA) Fight\nB) Pick it up\nC) Dance")
+      if (ans == 'a'):
+        print(f"You attack the monster with your sword dealing 73 damage.",
+        "\nIt lashes back with its tentacles, dealing 25 damage.\n")
+        monster.health.add(-73)
+        monster.isAlive = monster.aliveCheck()
+        player.health.add(-25)
+        player.isAlive = player.aliveCheck()
+      elif (ans == 'b'):
+        print(f"You strain to pick up the {monster.name}, dealing 85 damage but losing 35 stamina.",
+        f"\nThe {monster.name} struggles to get back up.\n")
+        player.stamina.add(-35)
+        player.isAlive = player.aliveCheck()
+        monster.health.add(-85)
+        monster.isAlive = monster.aliveCheck()
+      elif (ans == 'c'):
+        print(f"You dance your heart out, reducing {monster.name}'s spirit by  41.",
+        f"\nThe {monster.name} belts out an undescribable cry, reducing your sanity by 30.\n")
+        monster.mana.add(-41)
+        monster.isAlive = monster.aliveCheck()
+        player.sanity.add(-30)
+        player.isAlive = player.aliveCheck()
+      else:
+        pass
+  elif (ans == 'b'):
+    print("You commit ritual sudoku and die.\n")
+    player.isAlive = False
+  else:
+    pass
   return player
 
 player = gameLoop()
