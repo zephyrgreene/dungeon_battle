@@ -1,4 +1,5 @@
 from enum import Enum
+from random import randint
 
 # pools
 class pType(Enum):
@@ -8,24 +9,15 @@ class pType(Enum):
   SANITY = 4
   HUNGER = 5
 
-# items
 class ItemType(Enum):
-  EQUIP = 1
-  INVENT = 2
-  
-# equipped items
-class SlotType(Enum):
   WEAP = 1
   ARMOR = 2
   ACCESS = 3
-
-# backpack items
-class invType(Enum):
-  SELF = 1
-  ENEMY = 2
+  CONSUME = 4
 
 class Item:
-  def __init__(self, name = "default_item", healthDamage = 0, manaDamage = 0, staminaDamage = 0, sanityDamage = 0, hungerDamage = 0):
+  def __init__(self, name = "Empty", healthDamage = 0, manaDamage = 0, staminaDamage = 0, sanityDamage = 0, hungerDamage = 0, hitrange = 0, critchance = 0, healthRestore = 0, manaRestore = 0, staminaRestore = 0, sanityRestore = 0, hungerRestore = 0, healthMax= 0, manaMax = 0, staminaMax = 0, sanityMax = 0, hungerMax = 0, count = 0, itemtype = ItemType.CONSUME):
+    
     self.name = name
     
     self.healthDamage = healthDamage
@@ -34,15 +26,38 @@ class Item:
     self.sanityDamage = sanityDamage
     self.hungerDamage = hungerDamage
     
-  def showStats(self): # display for debug
-    print({
-        "name": self.name,
-        "healthDamage": self.healthDamage,
-        "manaDamage": self.manaDamage,
-        "staminaDamage": self.staminaDamage,
-        "sanityDamage": self.sanityDamage,
-        "hungerDamage": self.hungerDamage
-      })
+    # meant for weapons only
+    self.hitrange = hitrange
+    self.critchance = critchance
+    
+    # meant for consumables
+    self.healthRestore = healthRestore
+    self.manaRestore = manaRestore
+    self.staminaRestore = manaRestore
+    self.sanityRestore = sanityRestore
+    self.hungerRestore = sanityRestore
+    
+    # bonus stats!
+    self.healthMax = healthMax
+    self.manaMax = manaMax
+    self.staminaMax = staminaMax
+    self.sanityMax = sanityMax
+    self.hungerMax = hungerMax
+    
+    self.itemtype = itemtype
+    
+    if(self.itemtype == ItemType.CONSUME):
+      self.count = count
+    else:
+      self.count = 1
+    
+  def varianceRoll(self, value):
+    r = randint(0, self.hitrange)
+    return value * (100 - r)/100
+    
+  def criticalRoll(self, chance):
+    r = randint(0, 100)
+    return r <= chance
 
 # Planning: Items come in many types, primarily Equippable items and Usable/Consumable items
 # Player has Equipped, Equipped grants Stats, Player Uses items, Items [Do things]
@@ -367,3 +382,4 @@ player.equip(hammer)
 
 # stab = Action(name = "stab", descript = "stab at", damage = 15, damageType = "health", cost = 10, costType = "stamina", )
 # stab.showStats()
+
