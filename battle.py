@@ -2,7 +2,7 @@ from enum import Enum
 from random import randint
 
 # pools
-class pType(Enum):
+class PoolType(Enum):
   HEALTH = 1
   MANA = 2
   STAMINA = 3
@@ -61,15 +61,6 @@ class Item:
 
 # Planning: Items come in many types, primarily Equippable items and Usable/Consumable items
 # Player has Equipped, Equipped grants Stats, Player Uses items, Items [Do things]
-
-class Weapon(Item):
-  slotType = SlotType.WEAP
-    
-class Armor(Item):
-  slotType = SlotType.ARMOR
-  
-class Access(Item):
-  slotType = SlotType.ACCESS
 
 class Action:
   def __init__(self, name = 'default_action'):
@@ -130,6 +121,7 @@ class Attribute:
 
 class Entity:
   # PM = Pool Multiplier
+  BASE_P = 100
   HEALTH_PM = 10
   MANA_PM = 8
   STAM_PM = 9
@@ -141,23 +133,23 @@ class Entity:
     self.isPlayer = player
     self.name = name
     self.actions = ['Fight']
-    self.inventory = []
+    self.bag = []
     
-    self.weapon = Weapon("Empty")
-    self.armor = Armor("Empty")
-    self.access = Access("Empty")
+    self.weapon = Item(itemtype = ItemType.WEAP)
+    self.armor = Item(itemtype = ItemType.ARMOR)
+    self.access = Item(itemtype = ItemType.ACCESS)
     
-    self.vitality = Attribute(vitality)
-    self.intelligence = Attribute(intelligence)
-    self.strength = Attribute(strength)
-    self.psych = Attribute(psych)
-    self.sustenance = Attribute(sustenance)
+    self.vitality = vitality + Entity.BASE_P
+    self.intelligence = intelligence + Entity.BASE_P
+    self.strength = strength  + Entity.BASE_P
+    self.psych = psych + Entity.BASE_P
+    self.sustenance = sustenance + Entity.BASE_P
     
-    self.health = Pool(self.vitality.val * Entity.HEALTH_PM)
-    self.mana = Pool(self.intelligence.val * Entity.MANA_PM)
-    self.stamina = Pool(self.strength.val * Entity.STAM_PM)
-    self.sanity = Pool(self.psych.val * Entity.SANITY_PM)
-    self.hunger = Pool(self.sustenance.val * Entity.HUNGER_PM)
+    self.health = self.vitality * Entity.HEALTH_PM
+    self.mana = self.intelligence * Entity.MANA_PM
+    self.stamina = self.strength * Entity.STAM_PM
+    self.sanity = self.psych * Entity.SANITY_PM
+    self.hunger = self.sustenance * Entity.HUNGER_PM
     
     self.healthDamage = 5
     self.manaDamage = 5
@@ -180,23 +172,58 @@ class Entity:
         print(f"The {self.name} is dead.\nYou Win!")
     else:
       self.isAlive = True
+  
+  def intoBag(self, *items):
+    for item in items:
+      if (isinstance(item, Item)):
+        self.bag.append(item)
+      else:
+        raise Exception("You picked up a non-item somehow.")
       
-  def equip(self, item):
-    if (isinstance(item, Weapon)):
-      self.weapon = item
-      self.statsBonusUpdate()
-    elif (isinstance(item, Armor)):
-      self.armor = item
-      self.statsBonusUpdate()
-    elif (isinstance(item, Access)):
-      self.access = item
-      self.statsBonusUpdate()
-    else:
-      raise ValueError("Untyped item cannot be equipped.")
-      
-      # This method should Equip an Item to the Entity -- check?
-      # Then it should call the update method to add the Item stats to the Entity
+  # Should add Item objects to Inventory aka 'bag'
     
+  def fromBag(self, *items):
+    for item in items:
+      if (isinstance(item, Item)):
+        self.bag.remove(item)
+      else:
+        raise Exception("No item to remove")
+        
+  # Should remove Item objects from Inventory
+  
+  def equip(self, *items):
+    for item in items:
+      if item in self.bag or item.name == "Empty":
+        if (item.itemtype == ItemType.WEAP):
+          self.weapon = item
+          self.statsBonusUpdate()
+        elif (item.itemtype == ItemType.ARMOR):
+          self.armor = item
+          self.statsBonusUpdate()
+        elif (item.itemtype == ItemType.ACCESS):
+          self.access = item
+          self.statsBonusUpdate()
+        else:
+          print("Item cannot be equipped.")
+      else:
+          raise Exception("Item not found in inventory.")
+
+  # Checks item in bag, then...
+  # This method should Equip an Item to the Entity -- check?
+  # Then it should call the update method to add the Item stats to the Entity
+  
+  def use(self, consumable):
+    # use a Consumable
+    if (consumable.itemtype == ItemType.CONSUME):
+      if consumable in self.bag:
+        self.health += consumable.healthRestore
+        consumable.count -= 1
+        if consumable.count < 1:
+          self.fromBag(consumable)
+
+    else:
+      print("You cannot use this item that way!")
+  
   def statsBonusUpdate(self):
     self.healthDamageBonus = self.weapon.healthDamage + self.armor.healthDamage + self.access.healthDamage
     self.manaDamageBonus = self.weapon.manaDamage + self.armor.manaDamage + self.access.manaDamage
@@ -205,42 +232,19 @@ class Entity:
     self.hungerDamgeBonus = self.weapon.hungerDamage + self.armor.hungerDamage + self.access.hungerDamage
   
   def attack(self):
-    if (self.weapon.name == "hammer"):
-      healthDamage = "%.0f" % (1.10*(self.healthDamage + self.healthDamageBonus))
+    if (self.weapon.name != "Empty"):
+      healthDamage = self.weapon.varianceRoll(self.healthDamageBonus)
+      if (self.weapon.criticalRoll(self.weapon.critchance)):
+        healthDamage = (175 * healthDamage / 100)
+        print("Critical Hit!")
+      healthDamage = "%.0f" % healthDamage
       staminaCost = 8
       print(f"You attack with your {self.weapon.name} dealing {healthDamage} damage, costing {staminaCost} stamina.")
-      self.stamina.add(-staminaCost)
-      self.hunger.add(-4)
-      self.aliveCheck()
-    elif (self.weapon.name == "dagger"):
-      healthDamage = "%.0f" % (.9 *(self.healthDamage + self.healthDamageBonus))
-      staminaCost = 4
-      self.stamina.add(staminaCost)
-      self.stamina.add(-4)
-      print(f"You attack with your {self.weapon.name} dealing {healthDamage} damage, costing {staminaCost} stamina.")
+      # self.stamina.add(-staminaCost)
+      # self.hunger.add(-4)
+      # self.aliveCheck()
     else:
       print("Requires equipped weapon")
-  
-  def showStats(self): # display for debugging
-    print({
-      'vitality':self.vitality.val,
-      'intelligence' :self.intelligence.val,
-      'strength':self.strength.val,
-      'psych':self.psych.val,
-      'sustenance' :self.sustenance.val,
-      
-      'health':self.health.val,
-      'mana' :self.mana.val,
-      'stamina':self.stamina.val,
-      'sanity':self.sanity.val,
-      'hunger' :self.hunger.val,
-      
-      'health dmg':self.healthDamage,
-      'mana dmg':self.manaDamage,
-      'stamina dmg':self.staminaDamage,
-      'sanity dmg':self.sanityDamage,
-      'hunger dmg':self.hungerDamage
-    })
 
 class Question:
   def __init__(self, text, options, outcomes):
@@ -376,10 +380,12 @@ def gameLoop():
     pass
 
 player = Entity("Joe", player = True)
-hammer = Weapon(name = "hammer", healthDamage = 80)
-dagger = Weapon("dagger", 50)
+hammer = Item(name = "hammer", itemtype = ItemType.WEAP, healthDamage = 80, hitrange = 15, critchance = 8)
+dagger = Item("dagger", 50, itemtype = ItemType.WEAP, critchance = 16)
+flute = Item("flute", manaDamage = 50, itemtype = ItemType.WEAP, critchance = 23)
+potion = Item("healing potion", healthRestore = 25, itemtype = ItemType.CONSUME)
+player.intoBag(hammer, dagger, flute, potion)
 player.equip(hammer)
 
 # stab = Action(name = "stab", descript = "stab at", damage = 15, damageType = "health", cost = 10, costType = "stamina", )
 # stab.showStats()
-
